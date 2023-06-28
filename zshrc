@@ -38,15 +38,19 @@ for ((i=1; i<=$length; i++)); do
 done
 
 # theme
-ZSH_THEME_GIT_PROMPT_PREFIX=" %{$fg_bold[green]%}"
-ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}*"
+ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg_bold[cyan]%}["
+ZSH_THEME_GIT_PROMPT_SUFFIX="]%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}*%{$fg_bold[cyan]%}"
 ZSH_THEME_GIT_PROMPT_CLEAN=""
 
 function prompt_char {
 	if [ $UID -eq 0 ]; then echo "%{$fg_bold[blue]%}#%{$reset_color%}"; else echo "%{$fg_bold[blue]%}$%{$reset_color%}"; fi
 }
-PROMPT='%{$fg[cyan]%}%n%{$reset_color%}@%{$fg[cyan]%}%m%{$reset_color%}: %{$fg[green]%}%~%{$reset_color%}$(git_prompt_info) %(?, ,%{$fg[red]%}%?%{$reset_color%})
+
+# PROMPT='%{$fg[cyan]%}%n%{$reset_color%}@%{$fg[cyan]%}%m%{$reset_color%}: %{$fg[green]%}%~%{$reset_color%}$(git_prompt_info) %(?, ,%{$fg[red]%}%?%{$reset_color%})
+# $(prompt_char) '
+
+PROMPT='%{$fg[green]%}%~%{$reset_color%} $(git_prompt_info) %(?, ,%{$fg[red]%}%?%{$reset_color%})
 $(prompt_char) '
 
 RPROMPT='%{$fg_bold[green]%}[%D{%H:%M:%S}]%{$reset_color%}'
@@ -64,6 +68,11 @@ bindkey '\eh'  backward-char
 bindkey '\el'  forward-char
 bindkey '\ek'  up-line-or-history
 bindkey '\ej'  down-line-or-history 
+
+if [ ! -f "$HOME/.zshrc" ]; then
+    echo 'add .zshrc to $HOME'
+    ln -s $(pwd)/zshrc $HOME/.zshrc
+fi
 
 # from https://github.com/junegunn/fzf/blob/master/shell/key-bindings.zsh
 #     ____      ____
@@ -187,6 +196,3 @@ bindkey -M viins '^R' fzf-history-widget
   'unset' '__fzf_key_bindings_options'
 }
 
-if [ ! -f $HOME/.zshrc ]; then
-    ln -s $(pwd)/zshrc $HOME/.zshrc
-fi
