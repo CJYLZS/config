@@ -91,9 +91,10 @@ alias cls='clear'
 alias af='sudo find / -name '
 alias hf='history 1 | fzf'
 alias cx='curl -x socks5://127.0.0.1:7891 '
-# alias docker='sudo docker '
-# alias sys='sudo systemctl '
+alias docker='sudo docker '
+alias sys='sudo systemctl '
 alias py='python3 '
+alias nf='netstat -npl | fzf'
 
 bindkey '\eh'  backward-char
 bindkey '\el'  forward-char
