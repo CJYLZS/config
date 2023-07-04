@@ -35,4 +35,4 @@ if [ ! -f $tmux_conf ]; then
     ln -s $(pwd)/tmux.conf $tmux_conf
 fi
 
-tmux source-file $tmux_conf
+echo "use tmux source-file $tmux_conf to update config"
