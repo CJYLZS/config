@@ -37,6 +37,9 @@ for ((i=1; i<=$length; i++)); do
     fi
 done
 
+# vi-mode no delay
+KEYTIMEOUT=1
+
 # theme
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg_bold[cyan]%}["
 ZSH_THEME_GIT_PROMPT_SUFFIX="]%{$reset_color%}"
