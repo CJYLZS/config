@@ -46,15 +46,46 @@ ZSH_THEME_GIT_PROMPT_CLEAN=""
 function prompt_char {
 	if [ $UID -eq 0 ]; then echo "%{$fg_bold[blue]%}#%{$reset_color%}"; else echo "%{$fg_bold[blue]%}$%{$reset_color%}"; fi
 }
+function last_cmd_time_char {
+    echo "${zsh_exec_start:+[$zsh_exec_start }${zsh_last_cmd_cost:+${zsh_last_cmd_cost}s] }"
+}
 
 # PROMPT='%{$fg[cyan]%}%n%{$reset_color%}@%{$fg[cyan]%}%m%{$reset_color%}: %{$fg[green]%}%~%{$reset_color%}$(git_prompt_info) %(?, ,%{$fg[red]%}%?%{$reset_color%})
 # $(prompt_char) '
 
-PROMPT='%{$fg[green]%}%~%{$reset_color%} $(git_prompt_info) %(?, ,%{$fg[red]%}%?%{$reset_color%})
+PROMPT='%{$fg_bold[green]%}%~%{$reset_color%} $(git_prompt_info) %(?,%{$fg[green]%},%{$fg[red]%})$(last_cmd_time_char)%(?, ,%?)%{$reset_color%}
 $(prompt_char) '
 
 RPROMPT='%{$fg_bold[green]%}[%D{%H:%M:%S}]%{$reset_color%}'
 
+function my_preexec(){
+    # Set the ZSH_EXEC_START_TIMESTAMP variable to the current timestamp
+    zsh_exec_start=$(date +%H:%M:%S)
+    zsh_exec_start_tm=$(date +%s)
+}
+
+function my_precmd(){
+    if [[ ! -n ${zsh_exec_start_tm:+"set"} ]]; then
+        return
+    fi
+    # Get the current timestamp
+    zsh_exec_end_tm=$(date +%s)
+
+    # Calculate the time difference between now and ZSH_EXEC_START_TIMESTAMP
+    zsh_last_cmd_cost=$((zsh_exec_end_tm - zsh_exec_start_tm))
+    unset zsh_exec_start_tm
+}
+
+preexec_functions+=(my_preexec)
+precmd_functions+=(my_precmd)
+
+# update timestamp every second
+# TMOUT=1
+# TRAPALRM() {
+#     if [ "$WIDGET" != "complete-word" ]; then
+#         zle reset-prompt
+#     fi
+# }
 
 alias cls='clear'
 alias af='sudo find / -name '
@@ -75,12 +106,6 @@ if [ ! -f "$HOME/.zshrc" ]; then
 fi
 
 # improve from https://github.com/junegunn/fzf/blob/master/shell/key-bindings.zsh
-#     ____      ____
-#    / __/___  / __/
-#   / /_/_  / / /_
-#  / __/ / /_/ __/
-# /_/   /___/_/ key-bindings.zsh
-#
 # # The code at the top and the bottom of this file is the same as in completion.zsh.
 # # Refer to that file for explanation.
 # if 'zmodload' 'zsh/parameter' 2>'/dev/null' && (( ${+options} )); then
