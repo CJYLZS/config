@@ -145,25 +145,39 @@ fzf-file-widget() {
   local dir=""
   local cmd=""
 
-  read -A array <<< "$BUFFER"
+  read -A array <<< "$LBUFFER"
   local search_path="${array[-1]}"
-  if [[ ! -d $search_path ]];then
+  local search_text=""
+  if [[ -z $search_path ]];then
+      dir="./"
+  elif [[ $search_path =~ .*/$ ]];then
+      dir=$search_path
+  else
+      dir=$(dirname $search_path)
+      search_text=$(basename $search_path)
+  fi
+  if [[ ! -d $dir ]]; then
       return 1
   fi
-  dir=$search_path
   if [ ! -f /usr/bin/fd ]; then
       cmd="${FZF_CTRL_T_COMMAND:-"command find -L $dir -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
         -o -type f -print \
         -o -type d -print \
-        -o -type l -print 2> /dev/null | sed \"s|^$dir/||\""}"
+        -o -type l -print 2> /dev/null | sed \"s|^$dir||\""}"
   else
       cmd="fd . --type f $dir | sed \"s|^$dir||\""
   fi
 
   setopt localoptions pipefail no_aliases 2> /dev/null
-  local item="$(eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore ${FZF_DEFAULT_OPTS-} ${FZF_ALT_C_OPTS-}" $(__fzfcmd) +m)"
+  local item="$(eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore --query=\"$search_text\" ${FZF_DEFAULT_OPTS-} ${FZF_ALT_C_OPTS-}" $(__fzfcmd) +m)"
   local ret=$?
-  LBUFFER="${LBUFFER}$item"
+
+  args=(${(s: :)LBUFFER})
+  length=${#args[@]}
+  unset 'args[length]'
+  left_command="${args[@]}"
+
+  LBUFFER="$left_command$dir$item"
   zle reset-prompt
   return $ret
 }
